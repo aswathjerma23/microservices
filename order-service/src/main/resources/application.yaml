@@ -1,0 +1,64 @@
+spring:
+  application:
+    name: order-service
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/order-service
+    username: root
+    password: 
+  jpa:
+    hibernate:
+      ddl-auto: update
+server:
+  port: 0
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka:password@localhost:8761/eureka/
+
+management:
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include:
+        - "*"
+  endpoint:
+    health:
+      show-details: always
+  tracing:
+    sampling:
+      probability: 1.0
+    export:
+      zipkin:
+        endpoint: http://localhost:9411
+
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        slidingWindowType: COUNT_BASED
+        event-consumer-buffer-size: 10
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        slowCallDurationThreshold: 2s
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+    instances:
+      inventory:
+        baseConfig: default
+  timelimiter:
+    instances:
+      inventory:
+        timeout-duration: 3s
+  retry:
+    instances:
+      inventory:
+        maxAttempts: 3
+        waitDuration: 500ms
+
